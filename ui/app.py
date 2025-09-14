@@ -2,7 +2,7 @@ import tkinter as tk
 
 class App:
     def __init__(self, prediction):
-        self.prediciton = prediction
+        self.prediction = prediction
         self.root = tk.Tk()
         self.setup_ui()
 
