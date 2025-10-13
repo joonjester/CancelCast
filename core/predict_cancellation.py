@@ -15,9 +15,9 @@ from sklearn.metrics import (
 )
 
 
-def process_data():
+def process_data(pathToData: str):
     """Load CSV and create target + basic time features."""
-    df = pd.read_csv('../data/ncr_ride_bookings.csv')
+    df = pd.read_csv(pathToData)
 
     # --- Target: cancelled by customer (binary) ---
     # Use the provided indicator column; treat missing as 0
@@ -48,6 +48,8 @@ class Prediction:
         self.model = None
         self.pipeline = None
         self.feature_names_ = None
+        self.num_cols = None
+        self.cat_cols = None
 
     def build_X_y(self, df: pd.DataFrame):
         """Select features and split X / y. Avoid obvious leakage columns."""
@@ -109,6 +111,8 @@ class Prediction:
         print(y_train.value_counts(normalize=True).rename(lambda k: f'class_{k}'))
 
         self.pipeline = self.make_pipeline(num_cols, cat_cols)
+        self.num_cols = list(num_cols)
+        self.cat_cols = list(cat_cols)
         self.pipeline.fit(X_train, y_train)
 
         y_pred = self.pipeline.predict(X_test)
@@ -126,8 +130,38 @@ class Prediction:
 
         return self.pipeline
 
+
+    def _prepare_X_for_inference(self, df_new: pd.DataFrame) -> pd.DataFrame:
+        """Ensure df_new has the same columns as training. If a column is missing, create it as NA/None.
+        Numeric columns -> NaN, Categorical -> None. Extra columns are ignored.
+        """
+        assert self.num_cols is not None and self.cat_cols is not None, "Train the model before inference."
+
+        df_new = df_new.copy()
+        # create missing numeric columns as NaN
+        for c in self.num_cols:
+            if c not in df_new.columns:
+                df_new[c] = np.nan
+        # create missing categorical columns as None
+        for c in self.cat_cols:
+            if c not in df_new.columns:
+                df_new[c] = None
+        # keep only the training columns (order matters for ColumnTransformer)
+        X_new = df_new[self.num_cols + self.cat_cols]
+        return X_new
+
+    def predict_from_records(self, records: list[dict]) -> pd.DataFrame:
+        """Accept a list of python dicts (one per ride), return a DataFrame with probabilities for customer cancellation."""
+        assert self.pipeline is not None, "Model not trained. Call train_model() first."
+        df_new = pd.DataFrame.from_records(records)
+        X_new = self._prepare_X_for_inference(df_new)
+        proba = self.pipeline.predict_proba(X_new)[:, 1]
+        return pd.DataFrame({
+            'p_cancel_by_customer': proba
+        })
+
     def main(self):
-        df = process_data()
+        df = process_data(pathToData='../data/ncr_ride_bookings.csv')
         print('erste Zeilen:')
         print(df.head())
 
