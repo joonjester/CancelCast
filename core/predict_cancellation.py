@@ -7,6 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,
@@ -71,10 +72,11 @@ class Prediction:
         cat_cols = [c for c in cat_cols if c in df.columns]
 
         X = df[num_cols + cat_cols].copy()
+        print(f'Number of features: {len(num_cols) + len(cat_cols)}')
         return X, y, num_cols, cat_cols
 
-    def make_pipeline(self, num_cols, cat_cols):
-        """Create preprocessing + logistic regression pipeline."""
+    def make_pipeline(self, num_cols, cat_cols, model: str = 'logreg'):
+        """Create preprocessing + classifier pipeline. model in {'logreg','rf'}."""
         numeric_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())
@@ -92,13 +94,23 @@ class Prediction:
             ]
         )
 
-        # class_weight='balanced' helps if cancellations are rare
-        clf = LogisticRegression(max_iter=1000, class_weight='balanced', n_jobs=None)
+        # Choose classifier
+        model = (model or 'logreg').lower()
+        if model == 'rf':
+            clf = RandomForestClassifier(
+                n_estimators=300,
+                max_depth=None,
+                random_state=42,
+                class_weight='balanced'
+            )
+        else:
+            # default: logistic regression
+            clf = LogisticRegression(max_iter=1000, class_weight='balanced', n_jobs=None)
 
         pipe = Pipeline(steps=[('preprocess', preprocessor), ('clf', clf)])
         return pipe
 
-    def train_model(self, X, y, num_cols, cat_cols):
+    def train_model(self, X, y, num_cols, cat_cols, model: str = 'logreg'):
         # Drop rows with missing target
         mask = y.notna()
         X, y = X[mask], y[mask]
@@ -110,10 +122,15 @@ class Prediction:
         print('Class balance (train):')
         print(y_train.value_counts(normalize=True).rename(lambda k: f'class_{k}'))
 
-        self.pipeline = self.make_pipeline(num_cols, cat_cols)
+        print(f"Training model: {model}")
+        self.pipeline = self.make_pipeline(num_cols, cat_cols, model=model)
         self.num_cols = list(num_cols)
         self.cat_cols = list(cat_cols)
         self.pipeline.fit(X_train, y_train)
+
+        # Show feature importances for Random Forest
+        if str(model).lower() == 'rf':
+            self._rf_feature_importance(top_n=20)
 
         y_pred = self.pipeline.predict(X_test)
         y_proba = None
@@ -130,6 +147,25 @@ class Prediction:
 
         return self.pipeline
 
+
+    def _rf_feature_importance(self, top_n: int = 20):
+        """Print top-n feature importances for the current Random Forest pipeline."""
+        try:
+            clf = self.pipeline.named_steps['clf']
+            if not hasattr(clf, 'feature_importances_'):
+                print("Feature importance: current classifier has no feature_importances_.")
+                return
+            pre = self.pipeline.named_steps['preprocess']
+            feat_names = pre.get_feature_names_out()
+            importances = clf.feature_importances_
+            fi = pd.DataFrame({
+                'feature': feat_names,
+                'importance': importances
+            }).sort_values('importance', ascending=False)
+            print(f"\nTop {top_n} Feature Importances (Random Forest):")
+            print(fi.head(top_n).to_string(index=False))
+        except Exception as e:
+            print(f"Could not compute feature importances: {e}")
 
     def _prepare_X_for_inference(self, df_new: pd.DataFrame) -> pd.DataFrame:
         """Ensure df_new has the same columns as training. If a column is missing, create it as NA/None.
@@ -170,7 +206,12 @@ class Prediction:
         print(df.describe(include='all'))
 
         X, y, num_cols, cat_cols = self.build_X_y(df)
-        self.train_model(X, y, num_cols, cat_cols)
+        # Logistic Regression
+        print("\n=== Logistic Regression ===")
+        self.train_model(X, y, num_cols, cat_cols, model='logreg')
+        # Random Forest
+        print("\n=== Random Forest ===")
+        self.train_model(X, y, num_cols, cat_cols, model='rf')
 
 
 if __name__ == "__main__":
