@@ -1,4 +1,3 @@
-from ui.app import App
 from core.predict_cancellation import Prediction, process_data
 
 def main():
@@ -6,7 +5,6 @@ def main():
     df = process_data(pathToData='./data/ncr_ride_bookings.csv')
     X,y, num_cols, cat_cols = pred.build_X_y(df)
     pred.train_model(X, y, num_cols, cat_cols)
-
 
     records = [
         {
@@ -48,10 +46,6 @@ def main():
 
     probas_df = pred.predict_from_records(records)
     print(probas_df)
-
-
-    app = App(pred)
-    app.run()
 
 if __name__ == "__main__":
     main()
