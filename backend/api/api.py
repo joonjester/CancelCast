@@ -10,7 +10,7 @@ from core.predict_cancellation import Prediction, process_data
 app = Flask(__name__)
 
 pred = Prediction()
-df = process_data(pathToData='./data/ncr_ride_bookings.csv')
+df = process_data(pathToData='../data/ncr_ride_bookings.csv')
 X, y, num_cols, cat_cols = pred.build_X_y(df)
 pred.train_model(X, y, num_cols, cat_cols)
 
@@ -18,7 +18,7 @@ pred.train_model(X, y, num_cols, cat_cols)
 def home():
     return jsonify({"message": "Server is running!"})
 
-@app.route("/api/predict", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict_cancellation():
     try:
         data = request.get_json()
@@ -60,7 +60,7 @@ def predict_cancellation():
 
         result_df = pred.predict_from_records(records)
         prediction = float(result_df['p_cancel_by_customer'].iloc[0]) * 100
-        rounded = round(prediction, 4) 
+        rounded = round(prediction, 3) 
 
         return jsonify({
             'prediction': rounded

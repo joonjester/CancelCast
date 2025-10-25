@@ -16,8 +16,8 @@ export interface UberRide {
 export interface Driver {
   driver_name: string;
   vehicle_type: string;
-  pickup_location: number;
-  drop_location: number;
+  pickup_location: string;
+  drop_location: string;
   avg_vtat: number;
   avg_ctat: number;
   driver_rating: number;

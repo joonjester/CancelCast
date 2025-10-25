@@ -4,30 +4,27 @@ import { UberRide } from "../custom-types/custom-types";
 const useApi = () => {
   const getPrediction = useCallback(async (uberRide: UberRide) => {
     try {
-      const response = await fetch(
-        "http:// http://192.168.178.31:5001/api/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type:": "application/json",
-          },
-          body: JSON.stringify(uberRide),
-        }
-      );
+      const response = await fetch("http://localhost:5001/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(uberRide),
+      });
 
       if (!response.ok) {
         throw new Error("Failed get prediction");
       }
 
-      const data: string = await response.json();
-      return data;
+      const data = await response.json();
+      return data.prediction as number;
     } catch (error) {
       console.error("Error getting prediction: ", error);
       throw error;
     }
   }, []);
 
-  return getPrediction;
+  return { getPrediction };
 };
 
 export default useApi;

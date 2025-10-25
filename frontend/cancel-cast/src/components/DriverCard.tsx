@@ -1,17 +1,17 @@
 import { Avatar, Box, Card, LinearProgress, Typography } from "@mui/joy";
 import { Star, LocationOn, DirectionsCar } from "@mui/icons-material";
 import { Driver } from "../custom-types/custom-types";
+import React from "react";
 
 type DriverCardProps = {
   driver: Driver;
 };
 
 const DriverCard = ({ driver }: DriverCardProps) => {
-  const predictionPercent = Math.round(driver.prediction * 100);
   const predictionColor =
-    driver.prediction > 0.7
+    (driver.prediction || 0) > 0.7
       ? "success"
-      : driver.prediction > 0.4
+      : (driver.prediction || 0) > 0.4
       ? "warning"
       : "danger";
 
@@ -51,14 +51,14 @@ const DriverCard = ({ driver }: DriverCardProps) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <DirectionsCar sx={{ color: "white", fontSize: "1rem" }} />
             <Typography sx={{ color: "rgba(255,255,255,0.9)" }}>
-              {driver.vehicle_type}
+              {driver.vehicle_type || "N/A"}
             </Typography>
           </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Star sx={{ color: "#ffd700", fontSize: "1.2rem" }} />
           <Typography level="h4" sx={{ color: "white" }}>
-            {driver.driver_rating.toFixed(1)}
+            {(driver.driver_rating || 0).toFixed(1)}
           </Typography>
         </Box>
       </Box>
@@ -74,15 +74,15 @@ const DriverCard = ({ driver }: DriverCardProps) => {
           }}
         >
           <Typography level="body-sm" sx={{ color: "rgba(255,255,255,0.9)" }}>
-            Success Prediction
+            Liklihood of cancellation
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            {predictionPercent}%
+            {driver.prediction}%
           </Typography>
         </Box>
         <LinearProgress
           determinate
-          value={predictionPercent}
+          value={driver.prediction}
           color={predictionColor}
           sx={{
             "--LinearProgress-thickness": "8px",
@@ -111,7 +111,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             Booking Value
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            ${driver.booking_value.toFixed(2)}
+            ${(driver.booking_value || 0).toFixed(1)}
           </Typography>
         </Box>
 
@@ -123,7 +123,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             Distance
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            {driver.ride_distance.toFixed(1)} km
+            {(driver.ride_distance || 0).toFixed(1)} km
           </Typography>
         </Box>
 
@@ -135,7 +135,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             Avg VTAT
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            {driver.avg_vtat.toFixed(1)} min
+            {(driver.avg_vtat || 0).toFixed(1)} min
           </Typography>
         </Box>
 
@@ -147,7 +147,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             Avg CTAT
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            {driver.avg_ctat.toFixed(1)} min
+            {(driver.avg_ctat || 0).toFixed(1)} min
           </Typography>
         </Box>
       </Box>
@@ -171,7 +171,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
               Pickup
             </Typography>
             <Typography sx={{ color: "white" }}>
-              Location {driver.pickup_location}
+              {driver.pickup_location || "N/A"}
             </Typography>
           </Box>
         </Box>
@@ -187,7 +187,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
               Drop-off
             </Typography>
             <Typography sx={{ color: "white" }}>
-              Location {driver.drop_location}
+              {driver.drop_location || "N/A"}
             </Typography>
           </Box>
         </Box>
