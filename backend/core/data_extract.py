@@ -71,13 +71,6 @@ for i, (route, stats) in enumerate(top_routes, 1):
     print(f"  Avg CTAT Std: {stats['Avg CTAT Std']:.2f}")
     print(f"  Avg CTAT Mean: {stats['Avg CTAT Mean']:.2f}")
 
-# Optional: Konvertiere result_map zu DataFrame für Export
-result_df = pd.DataFrame.from_dict(result_map, orient='index')
-result_df.index.name = 'Route'
-result_df.to_csv('route_std_statistics.csv')
-
-print("\n\nErgebnis gespeichert in 'route_std_statistics.csv'")
-
 # Rückgabe der Maps
 print("\n=== Zusammenfassung ===")
 print(f"Anzahl eindeutiger Routen: {len(route_map)}")
