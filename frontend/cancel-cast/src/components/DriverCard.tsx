@@ -8,10 +8,17 @@ type DriverCardProps = {
 };
 
 const DriverCard = ({ driver }: DriverCardProps) => {
-  const predictionColor =
-    (driver.prediction || 0) > 0.7
+  const predictionLogRegColor =
+    (driver.predictionLogReg || 0) > 0.7
       ? "success"
-      : (driver.prediction || 0) > 0.4
+      : (driver.predictionLogReg || 0) > 0.4
+      ? "warning"
+      : "danger";
+
+  const predictionRfColor =
+    (driver.predictionRf || 0) > 0.7
+      ? "success"
+      : (driver.predictionRf || 0) > 0.4
       ? "warning"
       : "danger";
 
@@ -64,6 +71,11 @@ const DriverCard = ({ driver }: DriverCardProps) => {
       </Box>
 
       {/* Prediction Badge */}
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography level="body-md" sx={{ color: "rgba(255,255,255,0.9)" }}>
+          Liklihood of cancellation
+        </Typography>
+      </Box>
       <Box sx={{ mb: 2 }}>
         <Box
           sx={{
@@ -74,16 +86,43 @@ const DriverCard = ({ driver }: DriverCardProps) => {
           }}
         >
           <Typography level="body-sm" sx={{ color: "rgba(255,255,255,0.9)" }}>
-            Liklihood of cancellation
+            With Logistic Regression
           </Typography>
           <Typography level="h4" sx={{ color: "white" }}>
-            {driver.prediction}%
+            {driver.predictionLogReg}%
           </Typography>
         </Box>
         <LinearProgress
           determinate
-          value={driver.prediction}
-          color={predictionColor}
+          value={driver.predictionLogReg}
+          color={predictionLogRegColor}
+          sx={{
+            "--LinearProgress-thickness": "8px",
+            "--LinearProgress-radius": "8px",
+          }}
+        />
+      </Box>
+
+      <Box sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+          }}
+        >
+          <Typography level="body-sm" sx={{ color: "rgba(255,255,255,0.9)" }}>
+            With Random Forest
+          </Typography>
+          <Typography level="h4" sx={{ color: "white" }}>
+            {driver.predictionRf}%
+          </Typography>
+        </Box>
+        <LinearProgress
+          determinate
+          value={driver.predictionRf}
+          color={predictionRfColor}
           sx={{
             "--LinearProgress-thickness": "8px",
             "--LinearProgress-radius": "8px",

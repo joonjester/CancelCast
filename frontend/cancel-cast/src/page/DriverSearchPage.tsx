@@ -186,7 +186,8 @@ const DriverSearchPage = () => {
         driver_rating: randomNumForDriver,
         booking_value: bookingValue,
         ride_distance: distance,
-        prediction: prediction,
+        predictionLogReg: prediction.prediction_logreg,
+        predictionRf: prediction.prediction_rf,
       };
 
       driversArray.push(driver);

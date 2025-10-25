@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { UberRide } from "../custom-types/custom-types";
+import { Preditions, UberRide } from "../custom-types/custom-types";
 
 const useApi = () => {
   const getPrediction = useCallback(async (uberRide: UberRide) => {
@@ -17,7 +17,7 @@ const useApi = () => {
       }
 
       const data = await response.json();
-      return data.prediction as number;
+      return data as Preditions;
     } catch (error) {
       console.error("Error getting prediction: ", error);
       throw error;

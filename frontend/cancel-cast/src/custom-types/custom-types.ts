@@ -23,5 +23,11 @@ export interface Driver {
   driver_rating: number;
   booking_value: number;
   ride_distance: number;
-  prediction: number;
+  predictionLogReg: number;
+  predictionRf: number;
+}
+
+export interface Preditions {
+  prediction_logreg: number;
+  prediction_rf: number;
 }
