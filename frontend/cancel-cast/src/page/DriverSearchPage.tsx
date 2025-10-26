@@ -19,7 +19,6 @@ const DriverSearchPage = () => {
     bookingMin: number;
     bookingMax: number;
   } | null>(null);
-  const [prediction, setPrediction] = useState<number>();
   const [driversData, setDriversData] = useState<Driver[]>([]);
 
   const drivers = [
@@ -129,6 +128,42 @@ const DriverSearchPage = () => {
     setPayment(newValue);
   };
 
+  const forceDriver = async (driver: UberRide, driverName: string) => {
+    const uberRide: UberRide = {
+      vehicle_type: driver.vehicle_type,
+      pickup_location: pickUp,
+      drop_location: drop,
+      payment_method: payment,
+      avg_vtat: driver.avg_vtat,
+      avg_ctat: driver.avg_ctat,
+      booking_value: driver.booking_value,
+      ride_distance: driver.ride_distance,
+      driver_ratings: driver.driver_ratings,
+      customer_rating: 4.8,
+      hour: driver.hour,
+      weekday: driver.weekday,
+    };
+
+    const prediction = await getPrediction(uberRide);
+    console.log(prediction);
+
+    const newDriver: Driver = {
+      driver_name: driverName,
+      vehicle_type: driver.vehicle_type,
+      pickup_location: pickUp,
+      drop_location: drop,
+      avg_vtat: driver.avg_vtat,
+      avg_ctat: driver.avg_ctat,
+      driver_rating: driver.driver_ratings,
+      booking_value: driver.booking_value,
+      ride_distance: driver.ride_distance,
+      predictionLogReg: prediction.prediction_logreg,
+      predictionRf: prediction.prediction_rf,
+    };
+
+    return newDriver;
+  };
+
   const generateDriversData = async () => {
     if (!routeRanges) return;
 
@@ -193,6 +228,27 @@ const DriverSearchPage = () => {
       driversArray.push(driver);
     }
 
+    // change for specific driver
+    const date = new Date("2025-5-2T15:30:00");
+    const testDriver: UberRide = {
+      vehicle_type: "Auto",
+      pickup_location: pickUp,
+      drop_location: drop,
+      avg_vtat: 15,
+      avg_ctat: 30,
+      driver_ratings: 5,
+      booking_value: 200,
+      ride_distance: 20,
+      payment_method: payment,
+      customer_rating: 5,
+      hour: date.getHours(),
+      weekday: date.getDay(),
+    };
+
+    const newDriver = await forceDriver(testDriver, "Jakob");
+
+    driversArray.push(newDriver);
+
     setDriversData(driversArray);
   };
 
@@ -203,7 +259,7 @@ const DriverSearchPage = () => {
   }, [routeRanges, payment]);
 
   return (
-    <>
+    <Box>
       <Box display={"flex"}>
         <Box sx={{ paddingRight: 3 }}>
           <Select
@@ -248,7 +304,7 @@ const DriverSearchPage = () => {
             <DriverCard driver={driver} key={driver.driver_name} />
           ))}
       </Box>
-    </>
+    </Box>
   );
 };
 

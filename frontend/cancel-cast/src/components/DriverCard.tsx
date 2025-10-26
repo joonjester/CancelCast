@@ -1,7 +1,6 @@
-import { Avatar, Box, Card, LinearProgress, Typography } from "@mui/joy";
+import { Avatar, Box, Card, Typography } from "@mui/joy";
 import { Star, LocationOn, DirectionsCar } from "@mui/icons-material";
 import { Driver } from "../custom-types/custom-types";
-import React from "react";
 
 type DriverCardProps = {
   driver: Driver;
@@ -9,14 +8,14 @@ type DriverCardProps = {
 
 const DriverCard = ({ driver }: DriverCardProps) => {
   const predictionLogRegColor =
-    (driver.predictionLogReg || 0) > 12
+    (driver.predictionLogReg || 0) > 10
       ? "danger"
       : (driver.predictionLogReg || 0) > 5
       ? "warning"
       : "success";
 
   const predictionRfColor =
-    (driver.predictionRf || 0) > 12
+    (driver.predictionRf || 0) > 10
       ? "danger"
       : (driver.predictionRf || 0) > 5
       ? "warning"
@@ -28,8 +27,9 @@ const DriverCard = ({ driver }: DriverCardProps) => {
       sx={{
         maxWidth: 450,
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        border: 0,
         borderRadius: "lg",
-        boxShadow: "lg",
+        boxShadow: "0px 2px 4px rgba(246, 244, 241, 0.6)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -186,7 +186,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
       >
         <Box>
           <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
-            With Logistic Regression
+            Cancellatoin liklihood with Logistic Regression
           </Typography>
           <Typography level="h4" color={predictionLogRegColor}>
             {driver.predictionLogReg}%
@@ -194,7 +194,7 @@ const DriverCard = ({ driver }: DriverCardProps) => {
         </Box>
         <Box>
           <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
-            With Random Forest
+            Cancellation liklihood with Random Forest
           </Typography>
           <Typography level="h4" color={predictionRfColor}>
             {driver.predictionRf}%
