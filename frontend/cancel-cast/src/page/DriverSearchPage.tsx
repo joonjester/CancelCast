@@ -2,7 +2,7 @@ import DriverCard from "../components/DriverCard";
 import { Select, Option, Box } from "@mui/joy";
 import { Driver, UberRide } from "../custom-types/custom-types";
 import useApi from "../hooks/useApi";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const DriverSearchPage = () => {
   const { getPrediction } = useApi();
@@ -25,7 +25,7 @@ const DriverSearchPage = () => {
   const drivers = [
     "Whisker McClaw",
     "Tabby Pawsworth",
-    "Clawdia Scrathington",
+    "Clawdia Scratch",
     "Felix Meowser",
     "Luna Whipstail",
     "Sven",
@@ -33,7 +33,7 @@ const DriverSearchPage = () => {
 
   const vehicle = ["Go Mini", "Go Sedan", "Premier Sedan", "Ubere XL", "Auto"];
 
-  const handleRouteChange = (_event, newValue: string | null) => {
+  const handleRouteChange = (newValue: string | null) => {
     if (!newValue) return;
 
     switch (newValue) {
@@ -124,7 +124,7 @@ const DriverSearchPage = () => {
     }
   };
 
-  const handlePaymentChange = (_event, newValue: string | null) => {
+  const handlePaymentChange = (newValue: string | null) => {
     if (!newValue) return;
     setPayment(newValue);
   };
@@ -204,25 +204,30 @@ const DriverSearchPage = () => {
 
   return (
     <>
-      <Box>
-        <Select
-          placeholder="Select Route"
-          required
-          sx={{ minWidth: 200 }}
-          onChange={handleRouteChange}
-        >
-          <Option value="route1">Rohini West - Sohna Road</Option>
-          <Option value="route2">IMT Manesar - Subhash Chowk</Option>
-          <Option value="route3">Bhiwadi - DLF City Court</Option>
-          <Option value="route4">Rithala - Vatika Chowk</Option>
-          <Option value="route5">Tagore Garden - Udyog Vihar</Option>
-        </Select>
-
+      <Box display={"flex"}>
+        <Box sx={{ paddingRight: 3 }}>
+          <Select
+            placeholder="Select Route"
+            required
+            sx={{ minWidth: 200 }}
+            onChange={(_, newValue) =>
+              handleRouteChange(newValue as string | null)
+            }
+          >
+            <Option value="route1">Rohini West - Sohna Road</Option>
+            <Option value="route2">IMT Manesar - Subhash Chowk</Option>
+            <Option value="route3">Bhiwadi - DLF City Court</Option>
+            <Option value="route4">Rithala - Vatika Chowk</Option>
+            <Option value="route5">Tagore Garden - Udyog Vihar</Option>
+          </Select>
+        </Box>
         <Select
           placeholder="Select payment methode"
           required
           sx={{ minWidth: 200 }}
-          onChange={handlePaymentChange}
+          onChange={(_, newValue) =>
+            handlePaymentChange(newValue as string | null)
+          }
         >
           <Option value="upi">UPI</Option>
           <Option value="cash">Cash</Option>
@@ -231,12 +236,17 @@ const DriverSearchPage = () => {
           <Option value="uber_wallet">Uber Wallet</Option>
         </Select>
       </Box>
-      <Box>
+      <Box
+        sx={{ paddingTop: 3 }}
+        display={"grid"}
+        gap={3}
+        gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+      >
         {routeRanges &&
           payment &&
-          driversData.map((driver) => {
-            return <DriverCard driver={driver} key={driver.driver_name} />;
-          })}
+          driversData.map((driver) => (
+            <DriverCard driver={driver} key={driver.driver_name} />
+          ))}
       </Box>
     </>
   );

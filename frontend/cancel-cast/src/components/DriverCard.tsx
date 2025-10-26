@@ -9,18 +9,18 @@ type DriverCardProps = {
 
 const DriverCard = ({ driver }: DriverCardProps) => {
   const predictionLogRegColor =
-    (driver.predictionLogReg || 0) > 0.7
-      ? "success"
-      : (driver.predictionLogReg || 0) > 0.4
+    (driver.predictionLogReg || 0) > 12
+      ? "danger"
+      : (driver.predictionLogReg || 0) > 5
       ? "warning"
-      : "danger";
+      : "success";
 
   const predictionRfColor =
-    (driver.predictionRf || 0) > 0.7
-      ? "success"
-      : (driver.predictionRf || 0) > 0.4
+    (driver.predictionRf || 0) > 12
+      ? "danger"
+      : (driver.predictionRf || 0) > 5
       ? "warning"
-      : "danger";
+      : "success";
 
   return (
     <Card
@@ -68,66 +68,6 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             {(driver.driver_rating || 0).toFixed(1)}
           </Typography>
         </Box>
-      </Box>
-
-      {/* Prediction Badge */}
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography level="body-md" sx={{ color: "rgba(255,255,255,0.9)" }}>
-          Liklihood of cancellation
-        </Typography>
-      </Box>
-      <Box sx={{ mb: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 1,
-          }}
-        >
-          <Typography level="body-sm" sx={{ color: "rgba(255,255,255,0.9)" }}>
-            With Logistic Regression
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            {driver.predictionLogReg}%
-          </Typography>
-        </Box>
-        <LinearProgress
-          determinate
-          value={driver.predictionLogReg}
-          color={predictionLogRegColor}
-          sx={{
-            "--LinearProgress-thickness": "8px",
-            "--LinearProgress-radius": "8px",
-          }}
-        />
-      </Box>
-
-      <Box sx={{ mb: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 1,
-          }}
-        >
-          <Typography level="body-sm" sx={{ color: "rgba(255,255,255,0.9)" }}>
-            With Random Forest
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            {driver.predictionRf}%
-          </Typography>
-        </Box>
-        <LinearProgress
-          determinate
-          value={driver.predictionRf}
-          color={predictionRfColor}
-          sx={{
-            "--LinearProgress-thickness": "8px",
-            "--LinearProgress-radius": "8px",
-          }}
-        />
       </Box>
 
       {/* Info Grid */}
@@ -229,6 +169,36 @@ const DriverCard = ({ driver }: DriverCardProps) => {
               {driver.drop_location || "N/A"}
             </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Prediction Badge */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mt: 2,
+          p: 1.5,
+          bgcolor: "rgba(255,255,255,0.1)",
+          borderRadius: "sm",
+        }}
+      >
+        <Box>
+          <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            With Logistic Regression
+          </Typography>
+          <Typography level="h4" color={predictionLogRegColor}>
+            {driver.predictionLogReg}%
+          </Typography>
+        </Box>
+        <Box>
+          <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            With Random Forest
+          </Typography>
+          <Typography level="h4" color={predictionRfColor}>
+            {driver.predictionRf}%
+          </Typography>
         </Box>
       </Box>
     </Card>
