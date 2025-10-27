@@ -98,10 +98,11 @@ class Prediction:
         model = (model or 'logreg').lower()
         if model == 'rf':
             clf = RandomForestClassifier(
-                n_estimators=300,
-                max_depth=None,
-                random_state=42,
-                class_weight='balanced'
+                n_estimators=400,
+                max_depth=12,
+                min_samples_leaf=20,
+                class_weight='balanced_subsample',
+                random_state=42
             )
         else:
             # default: logistic regression
