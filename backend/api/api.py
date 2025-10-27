@@ -4,11 +4,15 @@ import joblib
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from core.predict_cancellation import Prediction, process_data
+from flask_cors import CORS
 
 predLogReg = joblib.load('../logreg.joblib')
 predRf = joblib.load('../rf.joblib')
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/predict": {"origins": ["http://localhost:5173", "http://localhost:3000"]}}, supports_credentials=True)
+
 
 pred = Prediction()
 df = process_data(pathToData='../data/ncr_ride_bookings.csv')
