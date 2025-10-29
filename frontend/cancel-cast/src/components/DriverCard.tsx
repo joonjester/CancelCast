@@ -8,16 +8,16 @@ type DriverCardProps = {
 
 const DriverCard = ({ driver }: DriverCardProps) => {
   const predictionLogRegColor =
-    (driver.predictionLogReg || 0) > 10
+    (driver.predictionLogReg || 0) >= 10
       ? "danger"
-      : (driver.predictionLogReg || 0) > 5
+      : (driver.predictionLogReg || 0) >= 5
       ? "warning"
       : "success";
 
   const predictionRfColor =
-    (driver.predictionRf || 0) > 10
+    (driver.predictionRf || 0) >= 10
       ? "danger"
-      : (driver.predictionRf || 0) > 5
+      : (driver.predictionRf || 0) >= 5
       ? "warning"
       : "success";
 
