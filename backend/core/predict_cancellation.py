@@ -8,6 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,
@@ -76,7 +77,7 @@ class Prediction:
         return X, y, num_cols, cat_cols
 
     def make_pipeline(self, num_cols, cat_cols, model: str = 'logreg'):
-        """Create preprocessing + classifier pipeline. model in {'logreg','rf'}."""
+        """Create preprocessing + classifier pipeline. model in {'logreg','rf','svm'}."""
         numeric_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())
@@ -102,6 +103,13 @@ class Prediction:
                 max_depth=12,
                 min_samples_leaf=20,
                 class_weight='balanced_subsample',
+                random_state=42
+            )
+        elif model == 'svm':
+            # Fast linear SVM for large/high-dimensional data; no probability fit (uses decision_function)
+            clf = LinearSVC(
+                class_weight='balanced',
+                dual='auto',
                 random_state=42
             )
         else:
@@ -135,16 +143,23 @@ class Prediction:
 
         y_pred = self.pipeline.predict(X_test)
         y_proba = None
+        y_scores = None
         try:
             y_proba = self.pipeline.predict_proba(X_test)[:, 1]
         except Exception:
-            pass
+            try:
+                y_scores = self.pipeline.decision_function(X_test)
+            except Exception:
+                y_scores = None
 
         print('Accuracy:', round(accuracy_score(y_test, y_pred), 4))
         print('Confusion matrix:\n', confusion_matrix(y_test, y_pred))
         print('Classification report:\n', classification_report(y_test, y_pred, digits=4))
         if y_proba is not None:
             print('ROC-AUC:', round(roc_auc_score(y_test, y_proba), 4))
+        elif y_scores is not None:
+            # Use decision_function scores for AUC when no predict_proba is available (e.g., LinearSVC)
+            print('ROC-AUC (decision_function):', round(roc_auc_score(y_test, y_scores), 4))
 
         return self.pipeline
 
@@ -192,7 +207,16 @@ class Prediction:
         assert self.pipeline is not None, "Model not trained. Call train_model() first."
         df_new = pd.DataFrame.from_records(records)
         X_new = self._prepare_X_for_inference(df_new)
-        proba = self.pipeline.predict_proba(X_new)[:, 1]
+        proba = None
+        try:
+            proba = self.pipeline.predict_proba(X_new)[:, 1]
+        except Exception:
+            # Fallback for models without predict_proba (e.g., LinearSVC): use decision_function and logistic mapping
+            try:
+                scores = self.pipeline.decision_function(X_new)
+                proba = 1 / (1 + np.exp(-scores))
+            except Exception:
+                raise RuntimeError("Current model does not support probability or decision scores for inference.")
         return pd.DataFrame({
             'p_cancel_by_customer': proba
         })
@@ -213,6 +237,9 @@ class Prediction:
         # Random Forest
         print("\n=== Random Forest ===")
         self.train_model(X, y, num_cols, cat_cols, model='rf')
+        # Support Vector Machine (LinearSVC - fast)
+        print("\n=== Support Vector Machine (LinearSVC) ===")
+        self.train_model(X, y, num_cols, cat_cols, model='svm')
 
 
 if __name__ == "__main__":
