@@ -15,6 +15,7 @@ from sklearn.metrics import (
     accuracy_score,
     roc_auc_score,
 )
+from sklearn.ensemble import VotingClassifier
 
 
 def process_data(pathToData: str):
@@ -77,7 +78,7 @@ class Prediction:
         return X, y, num_cols, cat_cols
 
     def make_pipeline(self, num_cols, cat_cols, model: str = 'logreg'):
-        """Create preprocessing + classifier pipeline. model in {'logreg','rf','svm'}."""
+        """Create preprocessing + classifier pipeline. model in {'logreg','rf','svm','ensemble'}."""
         numeric_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())
@@ -111,6 +112,26 @@ class Prediction:
                 class_weight='balanced',
                 dual='auto',
                 random_state=42
+            )
+        elif model == 'ensemble':
+            # Weighted Soft Voting Ensemble combining Logistic Regression, Random Forest, and Linear SVM (approximation)
+            logreg = LogisticRegression(max_iter=1000, class_weight='balanced')
+            rf = RandomForestClassifier(
+                n_estimators=400,
+                max_depth=12,
+                min_samples_leaf=20,
+                class_weight='balanced_subsample',
+                random_state=42
+            )
+            svm = LinearSVC(class_weight='balanced', dual='auto', random_state=42)
+            # Wrap LinearSVC in CalibratedClassifierCV for probability support
+            from sklearn.calibration import CalibratedClassifierCV
+            svm_calibrated = CalibratedClassifierCV(svm, method='isotonic', cv=3)
+            clf = VotingClassifier(
+                estimators=[('logreg', logreg), ('rf', rf), ('svm', svm_calibrated)],
+                voting='soft',
+                weights=[2, 3, 1],
+                n_jobs=-1
             )
         else:
             # default: logistic regression
@@ -240,6 +261,9 @@ class Prediction:
         # Support Vector Machine (LinearSVC - fast)
         print("\n=== Support Vector Machine (LinearSVC) ===")
         self.train_model(X, y, num_cols, cat_cols, model='svm')
+        # Weighted Soft Voting Ensemble
+        print("\n=== Weighted Soft Voting Ensemble (LogReg + RF + SVM) ===")
+        self.train_model(X, y, num_cols, cat_cols, model='ensemble')
 
 
 if __name__ == "__main__":
