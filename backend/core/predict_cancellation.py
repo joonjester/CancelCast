@@ -60,13 +60,13 @@ class Prediction:
 
         # Numeric features
         num_cols = [
-            'Avg VTAT', 'Avg CTAT', 'Booking Value', 'Ride Distance',
-            'Driver Ratings', 'Customer Rating', 'hour', 'weekday'
+            'Avg VTAT', 'hour', 'weekday', 'month'
         ]
+        #'Avg CTAT', 'Booking Value', 'Ride Distance', 'Payment Method',
 
         # Categorical features
         cat_cols = [
-            'Vehicle Type', 'Pickup Location', 'Drop Location', 'Payment Method'
+            'Vehicle Type', 'Pickup Location', 'Drop Location'
         ]
 
         # Keep only the columns that actually exist (robustness if schema changes)
@@ -100,9 +100,9 @@ class Prediction:
         model = (model or 'logreg').lower()
         if model == 'rf':
             clf = RandomForestClassifier(
-                n_estimators=400,
-                max_depth=12,
-                min_samples_leaf=20,
+                n_estimators=800,
+                max_depth=16,
+                min_samples_leaf=15,
                 class_weight='balanced_subsample',
                 random_state=42
             )
@@ -110,7 +110,6 @@ class Prediction:
             # Fast linear SVM for large/high-dimensional data; no probability fit (uses decision_function)
             clf = LinearSVC(
                 class_weight='balanced',
-                dual='auto',
                 random_state=42
             )
         elif model == 'ensemble':
@@ -130,7 +129,7 @@ class Prediction:
             clf = VotingClassifier(
                 estimators=[('logreg', logreg), ('rf', rf), ('svm', svm_calibrated)],
                 voting='soft',
-                weights=[2, 3, 1],
+                weights=[3, 1, 2],
                 n_jobs=-1
             )
         else:
