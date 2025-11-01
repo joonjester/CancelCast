@@ -1,5 +1,5 @@
-import { Avatar, Box, Card, Typography } from "@mui/joy";
-import { Star, LocationOn, DirectionsCar } from "@mui/icons-material";
+import { Avatar, Box, Card, Typography, LinearProgress } from "@mui/joy";
+import { LocationOn, DirectionsCar } from "@mui/icons-material";
 import { Driver } from "../custom-types/custom-types";
 
 type DriverCardProps = {
@@ -7,17 +7,10 @@ type DriverCardProps = {
 };
 
 const DriverCard = ({ driver }: DriverCardProps) => {
-  const predictionLogRegColor =
-    (driver.predictionLogReg || 0) >= 10
+  const predictionColor =
+    (driver.prediction || 0) >= 50
       ? "danger"
-      : (driver.predictionLogReg || 0) >= 5
-      ? "warning"
-      : "success";
-
-  const predictionRfColor =
-    (driver.predictionRf || 0) >= 10
-      ? "danger"
-      : (driver.predictionRf || 0) >= 5
+      : (driver.prediction || 0) >= 25
       ? "warning"
       : "success";
 
@@ -62,12 +55,21 @@ const DriverCard = ({ driver }: DriverCardProps) => {
             </Typography>
           </Box>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Star sx={{ color: "#ffd700", fontSize: "1.2rem" }} />
-          <Typography level="h4" sx={{ color: "white" }}>
-            {(driver.driver_rating || 0).toFixed(1)}
-          </Typography>
-        </Box>
+      </Box>
+
+      <Box>
+        <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
+          Likelihood of Cancellation
+        </Typography>
+        <Typography level="h4" color={predictionColor}>
+          {driver.prediction}%
+        </Typography>
+        <LinearProgress
+          determinate
+          value={driver.prediction}
+          variant="solid"
+          color={predictionColor}
+        />
       </Box>
 
       {/* Info Grid */}
@@ -83,51 +85,41 @@ const DriverCard = ({ driver }: DriverCardProps) => {
         }}
       >
         <Box>
-          <Typography
-            level="body-xs"
-            sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
-          >
-            Booking Value
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            ${(driver.booking_value || 0).toFixed(1)}
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography
-            level="body-xs"
-            sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
-          >
-            Distance
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            {(driver.ride_distance || 0).toFixed(1)} km
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography
-            level="body-xs"
-            sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
-          >
-            Avg VTAT
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            {(driver.avg_vtat || 0).toFixed(1)} min
-          </Typography>
-        </Box>
-
-        <Box>
-          <Typography
-            level="body-xs"
-            sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
-          >
-            Avg CTAT
-          </Typography>
-          <Typography level="h4" sx={{ color: "white" }}>
-            {(driver.avg_ctat || 0).toFixed(1)} min
-          </Typography>
+          <Box display="flex" gap={9} mb={2}>
+            <Box flex={1}>
+              <Typography
+                level="body-xs"
+                sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+              >
+                Date
+              </Typography>
+              <Typography level="h4" sx={{ color: "white" }}>
+                {driver.date}
+              </Typography>
+            </Box>
+            <Box flex={1}>
+              <Typography
+                level="body-xs"
+                sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+              >
+                Hour
+              </Typography>
+              <Typography level="h4" sx={{ color: "white" }}>
+                {driver.hour}
+              </Typography>
+            </Box>
+          </Box>
+          <Box>
+            <Typography
+              level="body-xs"
+              sx={{ color: "rgba(255,255,255,0.7)", mb: 0.5 }}
+            >
+              Avg VTAT
+            </Typography>
+            <Typography level="h4" sx={{ color: "white" }}>
+              {(driver.avg_vtat || 0).toFixed(1)} min
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
@@ -169,36 +161,6 @@ const DriverCard = ({ driver }: DriverCardProps) => {
               {driver.drop_location || "N/A"}
             </Typography>
           </Box>
-        </Box>
-      </Box>
-
-      {/* Prediction Badge */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mt: 2,
-          p: 1.5,
-          bgcolor: "rgba(255,255,255,0.1)",
-          borderRadius: "sm",
-        }}
-      >
-        <Box>
-          <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
-            Cancellatoin liklihood with Logistic Regression
-          </Typography>
-          <Typography level="h4" color={predictionLogRegColor}>
-            {driver.predictionLogReg}%
-          </Typography>
-        </Box>
-        <Box>
-          <Typography level="body-xs" sx={{ color: "rgba(255,255,255,0.7)" }}>
-            Cancellation liklihood with Random Forest
-          </Typography>
-          <Typography level="h4" color={predictionRfColor}>
-            {driver.predictionRf}%
-          </Typography>
         </Box>
       </Box>
     </Card>

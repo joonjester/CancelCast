@@ -2,14 +2,9 @@ export interface UberRide {
   vehicle_type: string;
   pickup_location: string;
   drop_location: string;
-  payment_method: string;
   avg_vtat: number;
-  avg_ctat: number;
-  booking_value: number;
-  ride_distance: number;
-  driver_ratings: number;
-  customer_rating: number;
   hour: number;
+  month: number;
   weekday: number;
 }
 
@@ -18,16 +13,12 @@ export interface Driver {
   vehicle_type: string;
   pickup_location: string;
   drop_location: string;
+  date: string;
+  hour: string;
   avg_vtat: number;
-  avg_ctat: number;
-  driver_rating: number;
-  booking_value: number;
-  ride_distance: number;
-  predictionLogReg: number;
-  predictionRf: number;
+  prediction: number;
 }
 
 export interface Preditions {
-  prediction_logreg: number;
-  prediction_rf: number;
+  prediction: number;
 }

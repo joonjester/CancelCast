@@ -22,11 +22,17 @@ def train_and_save_models():
     X3, y3, num_cols3, cat_cols3 = pred3.build_X_y(df3)
     pred3.train_model(X3, y3, num_cols3, cat_cols3, model='svm')
 
+    pred4 = Prediction()
+    df4 = process_data(pathToData='./data/ncr_ride_bookings.csv')
+    X4, y4, num_cols4, cat_cols4 = pred4.build_X_y(df4)
+    pred4.train_model(X4, y4, num_cols4, cat_cols4, model='ensemble')
+
     
     # Save both models
     joblib.dump(pred1, 'logreg.joblib')
     joblib.dump(pred2, 'rf.joblib')
     joblib.dump(pred3, 'svm.joblib')
+    joblib.dump(pred3, 'ensemble.joblib')
     
     print("models trained and saved!")
 
@@ -36,6 +42,7 @@ def load_and_predict():
     pred1 = joblib.load('logreg.joblib')
     pred2 = joblib.load('rf.joblib')
     pred3 = joblib.load('svm.joblib')
+    pred4 = joblib.load('ensemble.joblib')
     
     records = [
         {
@@ -57,14 +64,16 @@ def load_and_predict():
     probas1 = pred1.predict_from_records(records)
     probas2 = pred2.predict_from_records(records)
     probas3 = pred3.predict_from_records(records)
+    probas4 = pred4.predict_from_records(records)
     
     print("Logistic Regression predictions:", probas1)
     print("Random Forest predictions:", probas2)
     print("SVM predictions:", probas3)
+    print("Kombination predictions:", probas4)
 
 def main():
     # Train if models don't exist
-    if not os.path.exists('logreg.joblib') or not os.path.exists('rf.joblib') or not os.path.exists('svm.joblib'):
+    if not os.path.exists('logreg.joblib') or not os.path.exists('rf.joblib') or not os.path.exists('svm.joblib') or not os.path.exists('ensemble.joblib'):
         print("Training models...")
         train_and_save_models()
     
