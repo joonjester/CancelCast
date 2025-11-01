@@ -14,6 +14,7 @@ from sklearn.metrics import (
     confusion_matrix,
     accuracy_score,
     roc_auc_score,
+    f1_score,
 )
 from sklearn.ensemble import VotingClassifier
 
@@ -180,6 +181,11 @@ class Prediction:
         elif y_scores is not None:
             # Use decision_function scores for AUC when no predict_proba is available (e.g., LinearSVC)
             print('ROC-AUC (decision_function):', round(roc_auc_score(y_test, y_scores), 4))
+        # --- 3‑Zeilen F1‑Threshold (nur wenn Wahrscheinlichkeiten vorhanden sind) ---
+        if y_proba is not None:
+            thresholds = np.linspace(0.1, 0.9, 9)
+            best_thr = max(thresholds, key=lambda t: f1_score(y_test, (y_proba >= t).astype(int)))
+            print(f"Best threshold for F1: {best_thr:.2f}")
 
         return self.pipeline
 
