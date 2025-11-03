@@ -17,6 +17,7 @@ from sklearn.metrics import (
     f1_score,
 )
 from sklearn.ensemble import VotingClassifier
+from sklearn.inspection import permutation_importance
 
 
 def process_data(pathToData: str):
@@ -187,6 +188,10 @@ class Prediction:
             best_thr = max(thresholds, key=lambda t: f1_score(y_test, (y_proba >= t).astype(int)))
             print(f"Best threshold for F1: {best_thr:.2f}")
 
+        # --- Global feature importance via permutation (works for any pipeline; especially useful for the ensemble) ---
+        if str(model).lower() == 'ensemble':
+            self._permutation_importance(X_test, y_test, top_n=20, scoring='roc_auc', n_repeats=5)
+
         return self.pipeline
 
 
@@ -208,6 +213,29 @@ class Prediction:
             print(fi.head(top_n).to_string(index=False))
         except Exception as e:
             print(f"Could not compute feature importances: {e}")
+
+    def _permutation_importance(self, X_test: pd.DataFrame, y_test: pd.Series, top_n: int = 20, scoring: str = 'roc_auc', n_repeats: int = 5):
+        """Model-agnostic global feature importance via permutation on the ORIGINAL attributes (works with the full Pipeline).
+        Ranks the original columns passed into the pipeline (e.g., 'Avg VTAT', 'hour', 'Vehicle Type', ...).
+        """
+        try:
+            result = permutation_importance(
+                self.pipeline, X_test, y_test,
+                scoring=scoring,
+                n_repeats=n_repeats,
+                random_state=42,
+                n_jobs=-1
+            )
+            cols = list(X_test.columns)
+            imp = pd.DataFrame({
+                'feature': cols,
+                'perm_importance_mean': result.importances_mean,
+                'perm_importance_std': result.importances_std
+            }).sort_values('perm_importance_mean', ascending=False)
+            print(f"\nTop {top_n} Permutation Importances (scoring={scoring}, repeats={n_repeats}):")
+            print(imp.head(top_n).to_string(index=False))
+        except Exception as e:
+            print(f"Could not compute permutation importance: {e}")
 
     def _prepare_X_for_inference(self, df_new: pd.DataFrame) -> pd.DataFrame:
         """Ensure df_new has the same columns as training. If a column is missing, create it as NA/None.
