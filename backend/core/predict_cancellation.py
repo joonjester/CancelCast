@@ -119,8 +119,6 @@ class Prediction:
             logreg = LogisticRegression(max_iter=1000, class_weight='balanced')
             rf = RandomForestClassifier(
                 n_estimators=400,
-                max_depth=12,
-                min_samples_leaf=20,
                 class_weight='balanced_subsample',
                 random_state=42
             )
@@ -131,7 +129,7 @@ class Prediction:
             clf = VotingClassifier(
                 estimators=[('logreg', logreg), ('rf', rf), ('svm', svm_calibrated)],
                 voting='soft',
-                weights=[3, 1, 2],
+                weights=[1, 3, 2],
                 n_jobs=-1
             )
         else:
